@@ -8,7 +8,7 @@ function updateLocalStorage() {
 	localStorage.pizzaKMA = JSON.stringify(bucket);
 }
 
-// Зчитує дані кошика з localStorage, якщо вони там є, і конвертує їх з формату JSON назад в об'єкт Javascript.
+// Зчитує дані кошика з localStorage і конвертує їх з формату JSON назад в об'єкт Javascript.
 function fetchFromLocalStorage() {
 	if (localStorage.getItem("pizzaKMA") != null) {
 		bucket = JSON.parse(localStorage.getItem("pizzaKMA"));
@@ -71,6 +71,7 @@ function renderPizzaFigure(pizza) {
 	img.src = pizza.icon;
 	img.alt = pizza.title;
 	figure.appendChild(img);
+
 	const figcaption = document.createElement("figcaption");
 	const article = document.createElement("article");
 	const h2 = document.createElement("h2");
@@ -224,18 +225,21 @@ function resizeBucketItemsBackground() {
 	});
 }
 
-// 
 function renderBucketItem(bucketPizza) {
+    // Створюємо головний елемент секції для пункту кошика
 	const section = document.createElement("section");
 	section.classList.add("bucket-item");
 
+    // Створюємо заголовок для пункту кошика
 	const h3 = document.createElement("h3");
 	h3.innerHTML = `${bucketPizza.title} <span class="size">(${bucketPizza.size.name})</span>`;
 	section.appendChild(h3);
 
+    // Створюємо секцію для розміру піци
 	const sizeSection = document.createElement("section");
 	sizeSection.classList.add("size-section");
 
+    // Створюємо елемент для відображення діаметра піци
 	const diameter = document.createElement("span");
 	diameter.classList.add("diameter");
 
@@ -247,6 +251,7 @@ function renderBucketItem(bucketPizza) {
 	diameter.innerHTML += bucketPizza.size.size;
 	sizeSection.appendChild(diameter);
 
+    // Створюємо елемент для відображення ваги піци
 	const weight = document.createElement("span");
 	weight.classList.add("weight");
 
@@ -260,9 +265,11 @@ function renderBucketItem(bucketPizza) {
 
 	section.appendChild(sizeSection);
 
+    // Створюємо секцію для керування пунктом кошика
 	const controlSection = document.createElement("section");
 	controlSection.classList.add("control-section");
 
+    // Створюємо елемент для відображення ціни піци
 	const price = document.createElement("span");
 	price.classList.add("price");
 	price.textContent = `${bucketPizza.size.price}грн`;
@@ -270,6 +277,7 @@ function renderBucketItem(bucketPizza) {
 
 	const amountDiv = document.createElement("div");
 
+    // Створюємо кнопку для зменшення кількості піци
 	const lessBtn = document.createElement("button");
 	lessBtn.classList.add("less-btn");
 	lessBtn.dataset.tooltip = "Зменшити кількість";
@@ -281,6 +289,7 @@ function renderBucketItem(bucketPizza) {
 	amount.textContent = bucketPizza.amount;
 	amountDiv.appendChild(amount);
 
+    // Створюємо кнопку для збільшення кількості піци
 	const moreBtn = document.createElement("button");
 	moreBtn.classList.add("more-btn");
 	moreBtn.dataset.tooltip = "Збільшити кількість";
@@ -294,6 +303,7 @@ function renderBucketItem(bucketPizza) {
 		updateLocalStorage();
 	});
 
+    // Додаємо обробник подій до кнопки зменшення
 	lessBtn.addEventListener("click", (e) => {
 		e.preventDefault();
 		if (bucketPizza.amount > 1) {
@@ -310,6 +320,7 @@ function renderBucketItem(bucketPizza) {
 
 	controlSection.appendChild(amountDiv);
 
+    // Створюємо кнопку видалення пункту кошика
 	const deleteBtn = document.createElement("button");
 	deleteBtn.classList.add("delete");
 	deleteBtn.dataset.tooltip = "Видалити з корзини";
@@ -332,6 +343,7 @@ function renderBucketItem(bucketPizza) {
 	return section;
 }
 
+// отримання списку піц з json файлу. Коли дані успішно завантажуються, вони передаються в функцію callback
 function fetchPizzaList(callback) {
 	fetch("Pizza_List.json")
 		.then((response) => response.json())
@@ -339,6 +351,7 @@ function fetchPizzaList(callback) {
 		.catch((error) => console.log(error));
 }
 
+// ставить обробники подій на всі елементи фільтрації.
 function handleFilters() {
 	let filterOptions = document.querySelectorAll("nav li");
 	filterOptions.forEach((item) => {
@@ -349,6 +362,7 @@ function handleFilters() {
 		});
 	});
 }
+// приймає id елемента фільтра і фільтрує список всіх піц відповідно до вибраного фільтра. оновлює заголовок сторінки, щоб відображати обраний фільтр, і кількість відфільтрованих піц.
 function applyFilter(id) {
 	const title = document.getElementById("title");
 	switch (id) {
@@ -390,6 +404,8 @@ function applyFilter(id) {
 	renderMain();
 	document.getElementById("allPizzasAmount").innerText = filteredPizzas.length;
 }
+
+// перетворює об'єкт bucket в рядок, який містить деталі про кожну піцу в кошику
 function stringifyOrder() {
 	return bucket
 		.map((pizza) => {
@@ -397,52 +413,38 @@ function stringifyOrder() {
 		})
 		.join(", ");
 }
+
+// додає обробник події click на головний блок веб-сторінки. 
 function hideAsideWithClick() {
 	const aside = document.getElementById("bucketAside");
 
 	document.querySelector("body > main").addEventListener("click", (event) => {
-		if (event.target.closest("#openBucketBtn")) {
-			// Clicked element is the #openBucketBtn or its descendant, do nothing
-			return;
-		}
-		if (window.innerWidth <= 530 && window.innerWidth > 300) {
+		if (!event.target.closest("#openBucketBtn") && window.innerWidth <= 530 && window.innerWidth > 300) {
 			aside.style.transform = "translateX(100%)";
 		}
 	});
 }
+
+// сховання бічної панелі через свайп вправо.
 function hideAsideWithSwipe() {
-	// Variables to store swipe start and end coordinates
 	let startX = 0;
 	let endX = 0;
 
-	// Minimum swipe distance threshold
 	const minSwipeDistance = 30;
-
-	// Element to attach the swipe event listener
-
 	const aside = document.getElementById("bucketAside");
-	// Add touchstart event listener
 
 	aside.addEventListener("touchstart", function (event) {
 		console.log(event)
 		startX = event.touches[0].clientX;
 	
 	});
-	// Add touchend event listener
 	aside.addEventListener("touchend", function (event) {
 		console.log(event)
 		if (window.innerWidth <= 530 && window.innerWidth > 300) {
 			endX = event.changedTouches[0].clientX;
-	
-
-			// Calculate the distance in both X and Y axes
 			const deltaX = endX - startX;
-			
-
-			// Check if the distance is greater than the threshold
 
 			if (deltaX > minSwipeDistance) {
-					// Right swipe
 					console.log("Swiped right");
 					aside.style.transform = "translateX(100%)";
 				
@@ -450,6 +452,8 @@ function hideAsideWithSwipe() {
 		}
 	});
 }
+
+// відображення бічної панелі коли натиснута кнопка "openBucketBtn".
 function showAside() {
 	const aside = document.getElementById("bucketAside");
 
@@ -457,6 +461,8 @@ function showAside() {
 		aside.style.transform = "translateX(0)";
 	});
 }
+
+// визначає, показувати чи сховати бічну панель в залежності від ширини вікна
 function showOrHideAside() {
 	if (window.innerWidth <= 530 && window.innerWidth > 300) {
 		hideAsideWithSwipe();
@@ -466,9 +472,10 @@ function showOrHideAside() {
 		document.getElementById("bucketAside").style.transform = "translateX(0)";
 	}
 }
+
+// викликається, коли вся сторінка була повністю завантажена.
 window.onload = () => {
 	fetchPizzaList((data) => {
-		//console.log(data);
 		allPizzas = data;
 		filteredPizzas = allPizzas;
 		handleFilters();
@@ -478,6 +485,7 @@ window.onload = () => {
 		fetchFromLocalStorage();
 		console.log(allPizzas);
 		renderHTML();
+		applyFilter("all");
 
 		window.addEventListener("resize", () => {
 			resizeBucketItemsBackground();
